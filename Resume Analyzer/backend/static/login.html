@@ -1,0 +1,565 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login - Resume Analyzer</title>
+    <style>
+        :root {
+            --bg: #0f172a;
+            --bg-light: #1e293b;
+            --card: #1e293b;
+            --accent: #3b82f6;
+            --accent-hover: #2563eb;
+            --muted: #cbd5e1;
+            --text-primary: #f1f5f9;
+            --success: #10b981;
+            --danger: #ef4444;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Poppins', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #0f172a 0%, #1e293b 50%, #0f172a 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            color: var(--text-primary);
+        }
+
+        .auth-page-wrapper {
+            width: 100%;
+            max-width: 1000px;
+        }
+
+        .auth-container {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 40px;
+            align-items: stretch;
+        }
+
+        .auth-box {
+            background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
+            padding: 40px;
+            border-radius: 16px;
+            box-shadow: 0 25px 50px rgba(0, 0, 0, 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(148, 163, 184, 0.2);
+            animation: slideInLeft 0.6s ease-out;
+        }
+
+        .auth-header {
+            margin-bottom: 32px;
+        }
+
+        .auth-header h2 {
+            font-size: 32px;
+            margin-bottom: 8px;
+            color: var(--text-primary);
+        }
+
+        .auth-subtitle {
+            color: #94a3b8;
+            font-size: 14px;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: var(--text-primary);
+            font-size: 14px;
+        }
+
+        .input-wrapper {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            border: 2px solid rgba(148, 163, 184, 0.2);
+            border-radius: 8px;
+            background: rgba(15, 23, 42, 0.5);
+            padding: 0 12px;
+            transition: all 0.3s ease;
+        }
+
+        .input-wrapper:focus-within {
+            border-color: var(--accent);
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2);
+            background: rgba(15, 23, 42, 0.8);
+        }
+
+        .input-icon {
+            font-size: 18px;
+            display: flex;
+            align-items: center;
+            color: #94a3b8;
+        }
+
+        .check-icon {
+            color: var(--success);
+            font-size: 16px;
+            margin-left: auto;
+        }
+
+        .toggle-password {
+            background: none;
+            border: none;
+            color: #94a3b8;
+            cursor: pointer;
+            font-size: 18px;
+            padding: 4px;
+            margin-left: auto;
+            transition: color 0.3s ease;
+        }
+
+        .toggle-password:hover {
+            color: var(--accent);
+        }
+
+        .form-input {
+            width: 100%;
+            border: none;
+            background: transparent;
+            font-family: 'Poppins', sans-serif;
+            font-size: 14px;
+            color: var(--text-primary);
+            outline: none;
+            padding: 12px 8px;
+        }
+
+        .form-input::placeholder {
+            color: #64748b;
+        }
+
+        .field-error {
+            display: block;
+            color: #fca5a5;
+            font-size: 12px;
+            margin-top: 6px;
+        }
+
+        .form-checkbox {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin: 20px 0;
+        }
+
+        .form-checkbox input[type="checkbox"] {
+            width: 18px;
+            height: 18px;
+            cursor: pointer;
+            accent-color: var(--accent);
+        }
+
+        .form-checkbox label {
+            margin: 0;
+            color: #cbd5e1;
+            font-size: 14px;
+            font-weight: 400;
+            cursor: pointer;
+            user-select: none;
+        }
+
+        .error-message {
+            background: rgba(239, 68, 68, 0.15);
+            color: #fca5a5;
+            padding: 12px 16px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            font-size: 14px;
+            border-left: 4px solid #ef4444;
+            display: none;
+        }
+
+        .error-message.show {
+            display: block;
+            animation: slideIn 0.3s ease-out;
+        }
+
+        .submit-btn {
+            width: 100%;
+            padding: 12px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-family: 'Poppins', sans-serif;
+            font-size: 15px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-top: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        .submit-btn:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(102, 126, 234, 0.4);
+        }
+
+        .submit-btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+
+        .spinner {
+            display: inline-block;
+            width: 14px;
+            height: 14px;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            border-top-color: white;
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+        }
+
+        .auth-footer {
+            text-align: center;
+            margin-top: 24px;
+            padding-top: 24px;
+            border-top: 1px solid rgba(148, 163, 184, 0.2);
+        }
+
+        .auth-footer p {
+            color: #94a3b8;
+            font-size: 14px;
+            margin: 8px 0;
+        }
+
+        .auth-link {
+            color: var(--accent);
+            text-decoration: none;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+
+        .auth-link:hover {
+            text-decoration: underline;
+            color: #60a5fa;
+        }
+
+        .auth-info {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            gap: 20px;
+            animation: slideInRight 0.6s ease-out;
+        }
+
+        .info-card {
+            background: linear-gradient(135deg, rgba(59, 130, 246, 0.1) 0%, rgba(139, 92, 246, 0.1) 100%);
+            border: 1px solid rgba(59, 130, 246, 0.3);
+            border-radius: 12px;
+            padding: 24px;
+        }
+
+        .info-card h3 {
+            font-size: 20px;
+            color: var(--text-primary);
+            margin-bottom: 16px;
+        }
+
+        .info-card ul {
+            list-style: none;
+        }
+
+        .info-card li {
+            color: #cbd5e1;
+            font-size: 14px;
+            padding: 8px 0 8px 24px;
+            position: relative;
+        }
+
+        .info-card li:before {
+            content: "✓";
+            position: absolute;
+            left: 0;
+            color: var(--accent);
+            font-weight: bold;
+        }
+
+        @keyframes slideInLeft {
+            from {
+                opacity: 0;
+                transform: translateX(-30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
+        @keyframes slideInRight {
+            from {
+                opacity: 0;
+                transform: translateX(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(-10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        @media (max-width: 768px) {
+            .auth-container {
+                grid-template-columns: 1fr;
+                gap: 20px;
+            }
+
+            .auth-info {
+                order: -1;
+            }
+
+            .auth-box {
+                padding: 32px 24px;
+            }
+
+            .auth-header h2 {
+                font-size: 24px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="auth-page-wrapper">
+        <div class="auth-container">
+            <div class="auth-box">
+                <div class="auth-header">
+                    <h2>Welcome Back</h2>
+                    <p class="auth-subtitle">Sign in to your account</p>
+                </div>
+
+                <div id="errorMessage" class="error-message">
+                    <span id="errorText"></span>
+                </div>
+
+                <form id="loginForm">
+                    <!-- Email Field -->
+                    <div class="form-group">
+                        <label for="email">Email Address</label>
+                        <div class="input-wrapper">
+                            <span class="input-icon">📧</span>
+                            <input
+                                id="email"
+                                type="email"
+                                placeholder="you@example.com"
+                                class="form-input"
+                            />
+                            <span id="emailCheck" class="check-icon" style="display: none;">✓</span>
+                        </div>
+                        <span id="emailError" class="field-error"></span>
+                    </div>
+
+                    <!-- Password Field -->
+                    <div class="form-group">
+                        <label for="password">Password</label>
+                        <div class="input-wrapper">
+                            <span class="input-icon">🔐</span>
+                            <input
+                                id="password"
+                                type="password"
+                                placeholder="••••••••"
+                                class="form-input"
+                            />
+                            <button
+                                type="button"
+                                class="toggle-password"
+                                onclick="togglePassword()"
+                            >👁️‍🗨️</button>
+                        </div>
+                        <span id="passwordError" class="field-error"></span>
+                    </div>
+
+                    <!-- Remember Me -->
+                    <div class="form-checkbox">
+                        <input id="rememberMe" type="checkbox" />
+                        <label for="rememberMe">Remember me for next time</label>
+                    </div>
+
+                    <!-- Submit Button -->
+                    <button type="submit" class="submit-btn" id="submitBtn">
+                        🚀 Sign In
+                    </button>
+                </form>
+
+                <!-- Footer Links -->
+                <div class="auth-footer">
+                    <p>Don't have an account? <a href="/signup" class="auth-link">Sign up here</a></p>
+                    <p><a href="#" class="auth-link">Forgot your password?</a></p>
+                </div>
+            </div>
+
+            <!-- Side Info -->
+            <div class="auth-info">
+                <div class="info-card">
+                    <h3>✨ Why Sign In?</h3>
+                    <ul>
+                        <li>Save your resume analysis history</li>
+                        <li>Get personalized recommendations</li>
+                        <li>Track your progress over time</li>
+                        <li>Access templates anytime</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Check if already logged in
+        window.addEventListener('load', () => {
+          const token = localStorage.getItem('token');
+          if (token) {
+            window.location.href = '/';
+            return;
+          }
+        });
+
+        const form = document.getElementById('loginForm');
+        const emailInput = document.getElementById('email');
+        const passwordInput = document.getElementById('password');
+        const submitBtn = document.getElementById('submitBtn');
+        const errorMessage = document.getElementById('errorMessage');
+        const errorText = document.getElementById('errorText');
+
+        function validateEmail(email) {
+            const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            return re.test(email);
+        }
+
+        function updateEmailValidation() {
+            const emailCheck = document.getElementById('emailCheck');
+            const emailError = document.getElementById('emailError');
+            if (emailInput.value && validateEmail(emailInput.value)) {
+                emailCheck.style.display = 'block';
+                emailError.textContent = '';
+            } else if (emailInput.value) {
+                emailCheck.style.display = 'none';
+                emailError.textContent = 'Invalid email address';
+            } else {
+                emailCheck.style.display = 'none';
+                emailError.textContent = '';
+            }
+            updateSubmitButton();
+        }
+
+        function updatePasswordValidation() {
+            const passwordError = document.getElementById('passwordError');
+            if (passwordInput.value && passwordInput.value.length < 6) {
+                passwordError.textContent = 'Password must be at least 6 characters';
+            } else {
+                passwordError.textContent = '';
+            }
+            updateSubmitButton();
+        }
+
+        function updateSubmitButton() {
+            const isValid = emailInput.value && passwordInput.value && 
+                           validateEmail(emailInput.value) && 
+                           passwordInput.value.length >= 6;
+            submitBtn.disabled = !isValid;
+        }
+
+        function togglePassword() {
+            const btn = event.target;
+            if (passwordInput.type === 'password') {
+                passwordInput.type = 'text';
+                btn.textContent = '👁️';
+            } else {
+                passwordInput.type = 'password';
+                btn.textContent = '👁️‍🗨️';
+            }
+        }
+
+        emailInput.addEventListener('input', updateEmailValidation);
+        emailInput.addEventListener('blur', updateEmailValidation);
+        passwordInput.addEventListener('input', updatePasswordValidation);
+        passwordInput.addEventListener('blur', updatePasswordValidation);
+
+        form.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            errorMessage.classList.remove('show');
+
+            const email = emailInput.value;
+            const password = passwordInput.value;
+            const rememberMe = document.getElementById('rememberMe').checked;
+
+            submitBtn.disabled = true;
+            submitBtn.innerHTML = '<span class="spinner"></span>Signing in...';
+
+            try {
+                const response = await fetch('/api/auth/login', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ email, password })
+                });
+
+                const data = await response.json();
+
+                if (data.success) {
+                    localStorage.setItem('token', data.token);
+                    localStorage.setItem('user', JSON.stringify({ 
+                        name: data.name, 
+                        email: data.email 
+                    }));
+                    if (rememberMe) {
+                        localStorage.setItem('rememberMe', 'true');
+                        localStorage.setItem('savedEmail', email);
+                    }
+                    window.location.href = '/';
+                } else {
+                    errorText.textContent = data.error || 'Login failed';
+                    errorMessage.classList.add('show');
+                    submitBtn.disabled = false;
+                    submitBtn.innerHTML = '🚀 Sign In';
+                }
+            } catch (err) {
+                errorText.textContent = 'Connection error. Please try again.';
+                errorMessage.classList.add('show');
+                submitBtn.disabled = false;
+                submitBtn.innerHTML = '🚀 Sign In';
+            }
+        });
+
+        // Load remembered email if exists
+        window.addEventListener('load', () => {
+            if (localStorage.getItem('rememberMe')) {
+                const savedEmail = localStorage.getItem('savedEmail');
+                if (savedEmail) {
+                    emailInput.value = savedEmail;
+                    document.getElementById('rememberMe').checked = true;
+                    updateEmailValidation();
+                }
+            }
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,12 @@
+Flask==2.2.5
+pdfminer.six==20221105
+docx2txt==0.8
+python-dotenv==1.0.0
+flask-cors==3.0.10
+requests==2.31.0
+python-docx==0.8.11
+# spaCy is optional; analyzer falls back to heuristics if it's missing.
+# On some Windows/Python setups spaCy requires C++ build tools and compiled wheels.
+# If you have a compatible environment and want better name/education detection, you can install it manually:
+#   pip install "spacy==3.6.0"
+#   python -m spacy download en_core_web_sm

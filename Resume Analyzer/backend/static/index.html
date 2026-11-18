@@ -1,0 +1,856 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Resume Analyzer — AI Assistant</title>
+    <style>
+      :root{
+        --bg:#f4f7fb; --card:#ffffff; --muted:#6b7280; --accent:#2563eb; --glass:rgba(255,255,255,0.6);
+      }
+      .dark{--bg:#0b1220; --card:#0f1724; --muted:#9aa4b2; --accent:#60a5fa; --glass:rgba(255,255,255,0.03)}
+      *{box-sizing:border-box}
+      body{font-family:Inter,system-ui,Segoe UI,Roboto,Arial; margin:0; background:linear-gradient(135deg,var(--bg),#e6eefc); min-height:100vh; color:var(--muted)}
+      header{display:flex;align-items:center;justify-content:space-between;padding:18px 28px;gap:20px;flex-wrap:wrap}
+      .branding{display:flex;align-items:center;gap:12px}
+      .logo{width:46px;height:46px;border-radius:10px;display:grid;place-items:center;background:linear-gradient(135deg,var(--accent),#7dd3fc);box-shadow:0 6px 18px rgba(18,52,86,0.12);}
+      .logo svg{width:28px;height:28px}
+      h1{font-size:18px;margin:0;color:var(--muted)}
+      p.lead{margin:0;font-size:12px;color:var(--muted)}
+
+      /* Main Navigation */
+      .main-nav {
+        display: flex;
+        gap: 20px;
+        align-items: center;
+        margin: 0 40px;
+      }
+
+      .nav-link {
+        color: var(--muted);
+        text-decoration: none;
+        font-size: 13px;
+        font-weight: 500;
+        padding: 8px 12px;
+        border-radius: 8px;
+        transition: all 0.3s ease;
+        cursor: pointer;
+        border: 1px solid transparent;
+      }
+
+      .nav-link:hover {
+        color: var(--accent);
+        background: rgba(37, 99, 235, 0.08);
+      }
+
+      .nav-link.active {
+        color: var(--accent);
+        border-color: var(--accent);
+        background: rgba(37, 99, 235, 0.12);
+      }
+
+      .toggle{display:flex;align-items:center;gap:10px}
+      .toggle button{background:transparent;border:1px solid rgba(255,255,255,0.06);padding:8px 12px;border-radius:999px;color:var(--muted);cursor:pointer}
+
+      .container{display:grid;grid-template-columns:1fr;gap:22px;padding:20px;max-width:1200px;margin:12px auto}
+
+      .page-section {
+        display: none;
+      }
+
+      .page-section.active {
+        display: block;
+      }
+
+      /* Hero Section */
+      .hero {
+        background: linear-gradient(135deg, rgba(99, 102, 241, 0.1) 0%, rgba(139, 92, 246, 0.1) 100%);
+        border: 1px solid rgba(99, 102, 241, 0.2);
+        padding: 48px;
+        border-radius: 16px;
+        text-align: center;
+        margin-bottom: 32px;
+      }
+
+      .hero h2 {
+        font-size: 36px;
+        margin: 0 0 16px 0;
+        background: linear-gradient(135deg, #667eea, #764ba2);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+      }
+
+      .hero p {
+        font-size: 16px;
+        color: #cbd5e1;
+        margin: 0;
+        line-height: 1.6;
+      }
+
+      /* Stats Grid */
+      .stats-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 16px;
+        margin-bottom: 32px;
+      }
+
+      .stat-card {
+        background: linear-gradient(135deg, rgba(59, 130, 246, 0.1), rgba(139, 92, 246, 0.05));
+        border: 1px solid rgba(59, 130, 246, 0.2);
+        padding: 24px;
+        border-radius: 12px;
+        text-align: center;
+      }
+
+      .stat-number {
+        font-size: 32px;
+        font-weight: 700;
+        color: var(--accent);
+      }
+
+      .stat-label {
+        font-size: 13px;
+        color: #94a3b8;
+        margin-top: 8px;
+      }
+
+      /* Features Grid */
+      .features-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+        gap: 20px;
+        margin-bottom: 32px;
+      }
+
+      .feature-card {
+        background: linear-gradient(135deg, rgba(59, 130, 246, 0.08), rgba(139, 92, 246, 0.08));
+        border: 1px solid rgba(148, 163, 184, 0.2);
+        padding: 28px;
+        border-radius: 12px;
+        transition: all 0.3s ease;
+      }
+
+      .feature-card:hover {
+        transform: translateY(-4px);
+        border-color: var(--accent);
+        background: linear-gradient(135deg, rgba(59, 130, 246, 0.15), rgba(139, 92, 246, 0.15));
+        box-shadow: 0 10px 30px rgba(59, 130, 246, 0.2);
+      }
+
+      .feature-icon {
+        font-size: 32px;
+        margin-bottom: 12px;
+      }
+
+      .feature-card h4 {
+        font-size: 16px;
+        color: var(--text-primary);
+        margin: 0 0 8px 0;
+      }
+
+      .feature-card p {
+        font-size: 13px;
+        color: #cbd5e1;
+        margin: 0;
+        line-height: 1.6;
+      }
+
+      /* Process Steps */
+      .process-steps {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        gap: 20px;
+      }
+
+      .step {
+        background: linear-gradient(135deg, rgba(16, 185, 129, 0.1), rgba(59, 130, 246, 0.1));
+        border: 1px solid rgba(16, 185, 129, 0.2);
+        padding: 24px;
+        border-radius: 12px;
+        position: relative;
+      }
+
+      .step-number {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 36px;
+        height: 36px;
+        border-radius: 50%;
+        background: linear-gradient(135deg, #667eea, #764ba2);
+        color: white;
+        font-weight: 700;
+        margin-bottom: 12px;
+      }
+
+      .step h4 {
+        margin: 0 0 8px 0;
+        color: var(--text-primary);
+        font-size: 16px;
+      }
+
+      .step p {
+        margin: 0;
+        color: #cbd5e1;
+        font-size: 13px;
+        line-height: 1.6;
+      }
+
+      .card{background:var(--card);border-radius:12px;padding:18px;box-shadow:0 6px 20px rgba(2,6,23,0.06);overflow:hidden}
+
+      /* Upload area */
+      .upload-area{border:2px dashed rgba(100,116,139,0.14);padding:22px;border-radius:10px;display:flex;gap:18px;align-items:center}
+      .upload-area.drag{background:linear-gradient(90deg, rgba(37,99,235,0.04), rgba(96,165,250,0.02));border-color:var(--accent)}
+      .u-left{width:78px;height:78px;border-radius:10px;background:linear-gradient(135deg,#eef2ff,#e0f2fe);display:flex;align-items:center;justify-content:center}
+      .u-left svg{width:44px;height:44px;opacity:0.95}
+      .u-right{flex:1}
+      .u-right h3{margin:0 0 6px 0;color:var(--muted)}
+      .u-right p{margin:0 0 12px 0;color:var(--muted);font-size:13px}
+      .controls{display:flex;gap:10px;align-items:center}
+      input[type=file]{display:none}
+      .btn{background:var(--accent);border:none;color:white;padding:9px 12px;border-radius:8px;cursor:pointer;font-size:13px;font-weight:500}
+      .btn.secondary{background:transparent;color:var(--accent);border:1px solid rgba(96,165,250,0.12)}
+
+      /* Result area */
+      .result-grid{display:grid;grid-template-columns:150px 1fr;gap:16px;align-items:center;margin-top:18px}
+      .score-ring{width:150px;height:150px;display:grid;place-items:center}
+      .score-ring svg{transform:rotate(-90deg);width:150px;height:150px}
+      .score-text{font-weight:700;color:var(--muted);font-size:20px}
+      .dets h4{margin:0 0 8px 0;color:var(--muted)}
+      .chips{display:flex;flex-wrap:wrap;gap:8px}
+      .chip{background:var(--glass);padding:6px 8px;border-radius:8px;color:var(--muted);font-size:13px}
+
+      /* Chat */
+      .chat{display:flex;flex-direction:column;height:72vh}
+      .messages{flex:1;overflow:auto;padding:12px;display:flex;flex-direction:column;gap:12px;scroll-behavior:smooth}
+      .msg{max-width:80%;padding:12px 14px;border-radius:10px;background:linear-gradient(135deg,rgba(102,126,234,0.12),rgba(118,75,162,0.08));border-left:3px solid #667eea;color:#cbd5e1;word-wrap:break-word;line-height:1.4;animation:fadein 0.3s}
+      .msg.user{margin-left:auto;background:linear-gradient(135deg,#3b82f6,#2563eb);color:white;border:none;box-shadow:0 4px 12px rgba(59,130,246,0.3);font-weight:500}
+      .msg.system{background:linear-gradient(135deg,rgba(102,126,234,0.12),rgba(118,75,162,0.08));color:#cbd5e1;border-left:3px solid #667eea;align-self:flex-start}
+      .compose{display:flex;gap:8px;padding:12px;border-top:1px solid rgba(102,126,234,0.15)}
+      .compose input{flex:1;padding:10px 12px;border-radius:8px 0 0 8px;border:1px solid rgba(102,126,234,0.2);background:#1e293b;color:#e2e8f0;font-size:13px}
+      .compose input::placeholder{color:#64748b}
+      .compose .btn{border-radius:0 8px 8px 0;cursor:pointer;background:linear-gradient(135deg,#667eea,#764ba2);border:none;color:white;font-weight:600;transition:all 0.3s;padding:10px 16px}
+      .compose .btn:hover{box-shadow:0 4px 12px rgba(102,126,234,0.4);transform:translateY(-1px)}
+
+      footer{max-width:1100px;margin:24px auto;text-align:center;color:var(--muted);font-size:12px}
+
+      /* Responsive */
+      @media (max-width:900px){
+        .container{grid-template-columns:1fr}
+        header {
+          flex-wrap: wrap;
+        }
+        .main-nav {
+          order: 3;
+          flex-basis: 100%;
+          margin: 12px 0 0 0;
+          gap: 10px;
+        }
+        #upload-page > div {
+          grid-template-columns: 1fr;
+        }
+        .chat {
+          position: static;
+        }
+      }
+
+      @media (max-width: 600px) {
+        .nav-link {
+          font-size: 12px;
+          padding: 6px 10px;
+        }
+      }
+
+      /* subtle animations */
+      .pulse{animation:pulse 2.6s infinite}
+      @keyframes pulse{0%{transform:scale(1)}50%{transform:scale(1.02)}100%{transform:scale(1)}}
+
+    </style>
+  </head>
+  <body>
+    <header>
+      <div class="branding">
+        <div class="logo">
+          <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <rect x="3" y="3" width="18" height="18" rx="4" fill="white" opacity="0.06"/>
+            <path d="M6 14l3 3 9-9" stroke="#083344" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </div>
+        <div>
+          <h1>Resume Analyzer</h1>
+          <p class="lead">AI-powered resume review</p>
+        </div>
+      </div>
+
+      <!-- Main Navigation -->
+      <nav class="main-nav">
+        <a href="#" data-page="home" class="nav-link active">🏠 Home</a>
+        <a href="#" data-page="upload" class="nav-link">📄 Analyze</a>
+        <a href="#" data-page="templates" class="nav-link">📋 Templates</a>
+        <a href="#" data-page="history" class="nav-link">📈 History</a>
+      </nav>
+
+      <div class="toggle">
+        <span id="userDisplay" style="margin-right: 12px; color: var(--muted); font-size: 13px;"></span>
+        <button id="logoutBtn" class="btn secondary" style="font-size: 13px; display: none;">🚪 Logout</button>
+        <button id="themeToggle" title="Toggle dark mode">🌙 Night</button>
+      </div>
+    </header>
+
+    <main class="container">
+      <!-- Home Page (Welcome) -->
+      <section id="home-page" class="page-section active" style="display: none;">
+        <!-- Hero Section -->
+        <div class="hero">
+          <h2>Welcome to Resume Analyzer</h2>
+          <p>AI-powered insights to optimize your resume and land your dream job. Get instant feedback on ATS compatibility, formatting, and content quality.</p>
+        </div>
+
+        <!-- Stats Grid -->
+        <div class="stats-grid">
+          <div class="stat-card">
+            <div class="stat-number">98%</div>
+            <div class="stat-label">ATS Compatibility Rate</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-number">2.5M+</div>
+            <div class="stat-label">Resumes Analyzed</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-number">40%</div>
+            <div class="stat-label">Average Score Improvement</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-number">24/7</div>
+            <div class="stat-label">AI Assistant Support</div>
+          </div>
+        </div>
+
+        <!-- Features Grid -->
+        <div style="margin-bottom: 48px;">
+          <h3 style="margin-bottom: 24px;">Key Features</h3>
+          <div class="features-grid">
+            <div class="feature-card">
+              <div class="feature-icon">🎯</div>
+              <h4>ATS Score Analysis</h4>
+              <p>Get a detailed breakdown of your resume's ATS compatibility score with specific improvement suggestions.</p>
+            </div>
+            <div class="feature-card">
+              <div class="feature-icon">📊</div>
+              <h4>Real-time Feedback</h4>
+              <p>Receive instant feedback on formatting, keywords, skills, and content quality as you upload your resume.</p>
+            </div>
+            <div class="feature-card">
+              <div class="feature-icon">🤖</div>
+              <h4>AI Assistant</h4>
+              <p>Chat with our AI to get personalized recommendations and answers about optimizing your resume.</p>
+            </div>
+            <div class="feature-card">
+              <div class="feature-icon">📋</div>
+              <h4>Templates</h4>
+              <p>Access professionally designed, ATS-optimized resume templates for different career paths.</p>
+            </div>
+            <div class="feature-card">
+              <div class="feature-icon">📈</div>
+              <h4>Progress Tracking</h4>
+              <p>Track your resume improvements over time with our detailed analysis history.</p>
+            </div>
+            <div class="feature-card">
+              <div class="feature-icon">✅</div>
+              <h4>Best Practices</h4>
+              <p>Learn industry best practices for resume writing and ATS optimization from our knowledge base.</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- How It Works -->
+        <div style="margin-bottom: 48px;">
+          <h3 style="margin-bottom: 24px;">How It Works</h3>
+          <div class="process-steps">
+            <div class="step">
+              <div class="step-number">1</div>
+              <h4>Upload Resume</h4>
+              <p>Drag and drop your resume in PDF, DOCX, or TXT format to get started instantly.</p>
+            </div>
+            <div class="step">
+              <div class="step-number">2</div>
+              <h4>Instant Analysis</h4>
+              <p>Our AI analyzes your resume for ATS compatibility, formatting, and content quality.</p>
+            </div>
+            <div class="step">
+              <div class="step-number">3</div>
+              <h4>Get Insights</h4>
+              <p>View detailed recommendations and scores across multiple categories.</p>
+            </div>
+            <div class="step">
+              <div class="step-number">4</div>
+              <h4>Improve & Track</h4>
+              <p>Apply suggestions, re-upload, and track your progress over time.</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- CTA Section -->
+        <div class="card" style="background: linear-gradient(135deg, rgba(102, 126, 234, 0.15), rgba(118, 75, 162, 0.15)); text-align: center; padding: 48px;">
+          <h3 style="margin-top: 0; color: var(--text-primary);">Ready to Optimize Your Resume?</h3>
+          <p style="color: #cbd5e1; margin-bottom: 24px;">Get your resume ATS score in seconds with our advanced AI analysis.</p>
+          <button class="btn" onclick="switchPage('upload');" style="cursor: pointer; font-size: 15px; padding: 12px 24px;">Start Analyzing Now</button>
+        </div>
+      </section>
+
+      <!-- Upload & Analyze Page -->
+      <section id="upload-page" class="page-section">
+        <div style="margin-bottom: 32px;">
+          <h2 style="margin-bottom: 8px;">Analyze Your Resume</h2>
+          <p style="color: #cbd5e1; margin: 0;">Upload your resume to get instant ATS score, detailed feedback, and AI-powered recommendations.</p>
+        </div>
+
+        <div style="display: grid; grid-template-columns: 1fr 360px; gap: 20px; align-items: start;">
+          <!-- Upload Card -->
+          <div class="card upload-card">
+            <div id="drop" class="upload-area">
+              <div class="u-left pulse">
+                <svg viewBox="0 0 24 24"><path d="M12 3v10" stroke="#0b1220" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/><path d="M7 8l5-5 5 5" stroke="#0b1220" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+              </div>
+              <div class="u-right">
+                <h3>Drag & drop your resume</h3>
+              <p>PDF, DOCX or TXT format. Max 5MB. We'll analyze it instantly and provide detailed feedback.</p>
+              <div class="controls">
+                <label class="btn" for="fileInput">📁 Choose File</label>
+                <input id="fileInput" type="file" accept=".pdf,.doc,.docx,.txt" />
+                <button id="analyzeBtn" class="btn secondary">🚀 Analyze</button>
+                </div>
+              </div>
+            </div>
+
+            <div id="result" class="result" style="display:none">
+              <div class="result-grid">
+                <div class="score-ring card" style="display:grid;place-items:center">
+                  <svg id="ring" viewBox="0 0 36 36">
+                    <path d="M18 2a16 16 0 1 1 0 32 16 16 0 1 1 0-32" fill="none" stroke="#e6eefc" stroke-width="3"/>
+                    <path id="bar" d="M18 2a16 16 0 1 1 0 32 16 16 0 1 1 0-32" fill="none" stroke="#2563eb" stroke-width="3" stroke-dasharray="0 100" stroke-linecap="round"/>
+                  </svg>
+                  <div style="position:absolute;text-align:center">
+                    <div style="font-size:12px;color:var(--muted)">Resume Score</div>
+                    <div id="scoreVal" class="score-text">0</div>
+                  </div>
+                </div>
+
+                <div class="dets">
+                  <h4 id="nameDetected">No resume uploaded</h4>
+                  <div style="margin-top:8px" id="contactInfo"></div>
+                  <div style="margin-top:12px"><strong>Top suggestions</strong></div>
+                  <div id="suggestions" style="margin-top:8px" class="chips"></div>
+                  <div style="margin-top:12px"><strong>Skills detected</strong></div>
+                  <div id="skills" style="margin-top:8px" class="chips"></div>
+                </div>
+              </div>
+
+              <div style="margin-top:16px">
+                <details>
+                  <summary style="cursor:pointer">Preview extracted text</summary>
+                  <pre id="preview" style="max-height:220px;overflow:auto;background:var(--glass);padding:12px;border-radius:8px"> </pre>
+                </details>
+              </div>
+            </div>
+          </div>
+
+          <!-- Chat Sidebar -->
+          <div class="card chat" style="position: sticky; top: 80px; background: linear-gradient(135deg, rgba(102, 126, 234, 0.08), rgba(118, 75, 162, 0.08)); border: 1px solid rgba(102, 126, 234, 0.2);">
+            <div style="display:flex;align-items:center;gap:12px;margin-bottom:16px;padding-bottom:12px;border-bottom:1px solid rgba(102, 126, 234, 0.2)">
+              <div style="width:40px;height:40px;border-radius:10px;background:linear-gradient(135deg, #667eea, #764ba2);display:grid;place-items:center;font-size:20px">🤖</div>
+              <div style="flex: 1;">
+                <div style="font-weight: 600; color: var(--text-primary); font-size: 14px;">Resume Assistant</div>
+                <div style="font-size:11px;color:#94a3b8;margin-top:2px">Status: <span id="status" style="color: var(--accent);">ready</span></div>
+              </div>
+            </div>
+            <div id="messages" class="messages">
+              <div class="msg system">Hi 👋 Upload your resume and I'll provide detailed feedback. Ask me anything!</div>
+            </div>
+            <div class="compose">
+              <input id="chatInput" placeholder="Ask about your resume..." style="border-radius: 8px 0 0 8px;" />
+              <button id="sendBtn" class="btn" style="border-radius: 0 8px 8px 0; cursor: pointer;">Send</button>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Templates Page -->
+      <section id="templates-page" class="page-section">
+        <div style="margin-bottom: 32px;">
+          <h2 style="margin-bottom: 8px;">Professional Resume Templates</h2>
+          <p style="color: #cbd5e1; margin: 0;">Download ready-made templates to get started quickly. All templates are professionally designed and ATS-optimized.</p>
+        </div>
+
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 20px; margin-bottom: 40px;">
+          <div class="card" style="background: linear-gradient(135deg, rgba(59, 130, 246, 0.1), rgba(139, 92, 246, 0.1));">
+            <div style="font-size: 28px; margin-bottom: 12px;">📄</div>
+            <h4 style="margin: 0 0 8px 0; color: var(--text-primary);">Minimal Clean Resume</h4>
+            <p style="color: #cbd5e1; font-size: 13px; margin: 0 0 12px 0; line-height: 1.6;">Simple and professional. Perfect for traditional industries, consulting, and executive roles.</p>
+            <div style="display: flex; gap: 8px;">
+              <a class="btn" href="/templates/simple_resume.docx" style="flex: 1; text-align: center; padding: 8px 12px; font-size: 13px;">📥 Download</a>
+              <button class="btn secondary" style="padding: 8px 12px; font-size: 13px;">👁️ Preview</button>
+            </div>
+          </div>
+
+          <div class="card" style="background: linear-gradient(135deg, rgba(139, 92, 246, 0.1), rgba(236, 72, 153, 0.1));">
+            <div style="font-size: 28px; margin-bottom: 12px;">👔</div>
+            <h4 style="margin: 0 0 8px 0; color: var(--text-primary);">Professional Executive</h4>
+            <p style="color: #cbd5e1; font-size: 13px; margin: 0 0 12px 0; line-height: 1.6;">For executives and managers. Emphasizes leadership, achievements, and strategic impact.</p>
+            <div style="display: flex; gap: 8px;">
+              <a class="btn" href="/templates/professional_resume.docx" style="flex: 1; text-align: center; padding: 8px 12px; font-size: 13px;">📥 Download</a>
+              <button class="btn secondary" style="padding: 8px 12px; font-size: 13px;">👁️ Preview</button>
+            </div>
+          </div>
+
+          <div class="card" style="background: linear-gradient(135deg, rgba(236, 72, 153, 0.1), rgba(59, 130, 246, 0.1));">
+            <div style="font-size: 28px; margin-bottom: 12px;">🎨</div>
+            <h4 style="margin: 0 0 8px 0; color: var(--text-primary);">Creative Modern Design</h4>
+            <p style="color: #cbd5e1; font-size: 13px; margin: 0 0 12px 0; line-height: 1.6;">Modern layout for creative professionals, designers, and marketing roles.</p>
+            <div style="display: flex; gap: 8px;">
+              <a class="btn" href="/templates/creative_resume.docx" style="flex: 1; text-align: center; padding: 8px 12px; font-size: 13px;">📥 Download</a>
+              <button class="btn secondary" style="padding: 8px 12px; font-size: 13px;">👁️ Preview</button>
+            </div>
+          </div>
+
+          <div class="card" style="background: linear-gradient(135deg, rgba(16, 185, 129, 0.1), rgba(59, 130, 246, 0.1));">
+            <div style="font-size: 28px; margin-bottom: 12px;">🎓</div>
+            <h4 style="margin: 0 0 8px 0; color: var(--text-primary);">Academic & Research CV</h4>
+            <p style="color: #cbd5e1; font-size: 13px; margin: 0 0 12px 0; line-height: 1.6;">For academics and researchers. Detailed publication, research, and academic format.</p>
+            <div style="display: flex; gap: 8px;">
+              <a class="btn" href="/templates/academic_resume.docx" style="flex: 1; text-align: center; padding: 8px 12px; font-size: 13px;">📥 Download</a>
+              <button class="btn secondary" style="padding: 8px 12px; font-size: 13px;">👁️ Preview</button>
+            </div>
+          </div>
+
+          <div class="card" style="background: linear-gradient(135deg, rgba(245, 158, 11, 0.1), rgba(59, 130, 246, 0.1));">
+            <div style="font-size: 28px; margin-bottom: 12px;">💻</div>
+            <h4 style="margin: 0 0 8px 0; color: var(--text-primary);">Technical Engineer Resume</h4>
+            <p style="color: #cbd5e1; font-size: 13px; margin: 0 0 12px 0; line-height: 1.6;">For software engineers and tech professionals. Emphasizes technical skills and projects.</p>
+            <div style="display: flex; gap: 8px;">
+              <a class="btn" href="/templates/technical_resume.docx" style="flex: 1; text-align: center; padding: 8px 12px; font-size: 13px;">📥 Download</a>
+              <button class="btn secondary" style="padding: 8px 12px; font-size: 13px;">👁️ Preview</button>
+            </div>
+          </div>
+
+          <div class="card" style="background: linear-gradient(135deg, rgba(99, 102, 241, 0.1), rgba(139, 92, 246, 0.1));">
+            <div style="font-size: 28px; margin-bottom: 12px;">🔄</div>
+            <h4 style="margin: 0 0 8px 0; color: var(--text-primary);">Hybrid Skills Focus</h4>
+            <p style="color: #cbd5e1; font-size: 13px; margin: 0 0 12px 0; line-height: 1.6;">Balanced format for varied backgrounds, career transitions, and mixed experience.</p>
+            <div style="display: flex; gap: 8px;">
+              <a class="btn" href="/templates/hybrid_resume.docx" style="flex: 1; text-align: center; padding: 8px 12px; font-size: 13px;">📥 Download</a>
+              <button class="btn secondary" style="padding: 8px 12px; font-size: 13px;">👁️ Preview</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="card" style="background: linear-gradient(135deg, rgba(16, 185, 129, 0.08), rgba(59, 130, 246, 0.08));">
+          <h3 style="margin-top: 0; color: var(--text-primary);">📋 Resume Writing Tips</h3>
+          <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 20px;">
+            <div>
+              <h4 style="color: var(--accent); font-size: 14px;">✓ Formatting Best Practices</h4>
+              <ul style="color: #cbd5e1; font-size: 13px; line-height: 1.8; margin: 8px 0;">
+                <li>Use standard fonts (Arial, Calibri, Times New Roman)</li>
+                <li>Keep margins between 0.5" and 1"</li>
+                <li>Use consistent spacing and alignment</li>
+                <li>Avoid tables, graphics, and unusual formatting</li>
+              </ul>
+            </div>
+            <div>
+              <h4 style="color: var(--accent); font-size: 14px;">✓ Content Optimization</h4>
+              <ul style="color: #cbd5e1; font-size: 13px; line-height: 1.8; margin: 8px 0;">
+                <li>Use action verbs: "Led", "Developed", "Achieved"</li>
+                <li>Include metrics and quantifiable results</li>
+                <li>Tailor content for each job application</li>
+                <li>Highlight relevant skills and keywords</li>
+              </ul>
+            </div>
+            <div>
+              <h4 style="color: var(--accent); font-size: 14px;">✓ ATS Optimization</h4>
+              <ul style="color: #cbd5e1; font-size: 13px; line-height: 1.8; margin: 8px 0;">
+                <li>Save as PDF or DOCX format</li>
+                <li>Avoid headers, footers, and complex layouts</li>
+                <li>Use clear section headings</li>
+                <li>Include relevant keywords from job description</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- History Page -->
+      <section id="history-page" class="page-section">
+        <div style="margin-bottom: 32px;">
+          <h2 style="margin-bottom: 8px;">Analysis History</h2>
+          <p style="color: #cbd5e1; margin: 0;">Your recent resume analyses and scores. Track your improvements over time.</p>
+        </div>
+
+        <!-- Stats Overview -->
+        <div class="stats-grid" style="margin-bottom: 32px;">
+          <div class="stat-card">
+            <div class="stat-number" id="totalAnalyses">0</div>
+            <div class="stat-label">Total Analyses</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-number" id="averageScore">0</div>
+            <div class="stat-label">Average Score</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-number" id="highestScore">0</div>
+            <div class="stat-label">Highest Score</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-number" id="improvementPercent">0%</div>
+            <div class="stat-label">Improvement</div>
+          </div>
+        </div>
+
+        <!-- History List -->
+        <div class="card">
+          <h3 style="margin-top: 0; margin-bottom: 24px;">Recent Analyses</h3>
+          <div id="historyList" style="color: var(--muted); text-align: center; padding: 40px 20px;">
+            <div style="font-size: 32px; margin-bottom: 12px;">📊</div>
+            <p>No analyses yet. Upload your first resume to get started!</p>
+            <button class="btn" onclick="switchPage('upload');" style="cursor: pointer; margin-top: 16px; font-size: 13px; padding: 8px 16px;">Upload Resume</button>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <footer>
+      Built for Dayanand Science College • Resume Analyzer project
+    </footer>
+
+    <script>
+      // Page Navigation Function
+      function switchPage(page) {
+        // Hide all pages
+        document.querySelectorAll('.page-section').forEach(section => {
+          section.classList.remove('active');
+        });
+
+        // Show selected page
+        document.getElementById(page + '-page').classList.add('active');
+
+        // Update active nav link
+        document.querySelectorAll('.nav-link').forEach(link => {
+          link.classList.remove('active');
+        });
+        document.querySelector(`[data-page="${page}"]`).classList.add('active');
+
+        // Scroll to top
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      }
+
+      // Authentication Check
+      window.addEventListener('load', () => {
+        const token = localStorage.getItem('token');
+        const user = localStorage.getItem('user');
+        
+        if (!token || !user) {
+          window.location.href = '/login';
+          return;
+        }
+
+        // Display user info in header
+        try {
+          const userData = JSON.parse(user);
+          if (userData.name) {
+            document.getElementById('userDisplay').textContent = `👤 ${userData.name}`;
+            document.getElementById('logoutBtn').style.display = 'block';
+            document.getElementById('logoutBtn').onclick = () => {
+              localStorage.removeItem('token');
+              localStorage.removeItem('user');
+              window.location.href = '/login';
+            };
+          }
+        } catch (e) {
+          console.error('Error parsing user info:', e);
+        }
+
+        // Navigation handler
+        document.querySelectorAll('.nav-link').forEach(link => {
+          link.addEventListener('click', (e) => {
+            e.preventDefault();
+            const page = e.target.dataset.page;
+            if (page) switchPage(page);
+          });
+        });
+
+        // Show home page by default
+        document.getElementById('home-page').classList.add('active');
+        updateHistoryDisplay();
+      });
+
+      // Theme
+      const root = document.documentElement;
+      const body = document.body;
+      const themeToggle = document.getElementById('themeToggle');
+      const saved = localStorage.getItem('theme');
+      if(saved === 'dark' || (!saved && window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches)){
+        body.classList.add('dark'); themeToggle.innerText = '☀️ Day';
+      }
+      themeToggle.onclick = ()=>{
+        body.classList.toggle('dark'); const mode = body.classList.contains('dark') ? 'dark' : 'light'; localStorage.setItem('theme', mode); themeToggle.innerText = mode==='dark' ? '☀️ Day' : '🌙 Night';
+      }
+
+      // Upload / analyze
+      const fileInput = document.getElementById('fileInput');
+      const drop = document.getElementById('drop');
+      const analyzeBtn = document.getElementById('analyzeBtn');
+      const resultCard = document.getElementById('result');
+      const scoreVal = document.getElementById('scoreVal');
+      const bar = document.getElementById('bar');
+      const nameDetected = document.getElementById('nameDetected');
+      const contactInfo = document.getElementById('contactInfo');
+      const suggestionsEl = document.getElementById('suggestions');
+      const skillsEl = document.getElementById('skills');
+      const preview = document.getElementById('preview');
+      let lastAnalysis = null;
+
+      function setStatus(s){document.getElementById('status').innerText = s}
+
+      ['dragenter','dragover'].forEach(e=>drop.addEventListener(e, ev=>{ev.preventDefault(); drop.classList.add('drag')}));
+      ['dragleave','drop'].forEach(e=>drop.addEventListener(e, ev=>{ev.preventDefault(); drop.classList.remove('drag')}));
+      drop.addEventListener('drop', ev=>{ if(ev.dataTransfer.files && ev.dataTransfer.files[0]){ fileInput.files = ev.dataTransfer.files; handleFileSelected(); } });
+      fileInput.addEventListener('change', handleFileSelected);
+
+      function handleFileSelected(){
+        const f = fileInput.files[0];
+        if(f){ analyzeBtn.innerText = 'Analyze'; }
+      }
+
+      analyzeBtn.addEventListener('click', async ()=>{
+        const f = fileInput.files[0];
+        if(!f){ alert('Please choose a file first'); return }
+        setStatus('analyzing...');
+        analyzeBtn.disabled = true; analyzeBtn.innerText='Analyzing...';
+        const fd = new FormData(); fd.append('file', f);
+        try{
+          const res = await fetch('/api/upload', {method:'POST', body: fd});
+          const j = await res.json();
+          lastAnalysis = j;
+          showResult(j);
+          setStatus('ready');
+          addMessage('system', 'Resume uploaded and analyzed. Score: '+j.score);
+        }catch(err){
+          console.error(err); alert('Upload failed'); setStatus('error');
+        }finally{ analyzeBtn.disabled=false; analyzeBtn.innerText='Analyze'; }
+      });
+
+      function showResult(j){
+        resultCard.style.display='block';
+        const s = Math.round(j.score || 0);
+        scoreVal.innerText = s;
+        const pct = Math.max(0, Math.min(100, s));
+        // animate stroke-dasharray
+        const len = 100;
+        const dash = (pct/100)*len;
+        bar.setAttribute('stroke-dasharray', `${dash} ${len-dash}`);
+        nameDetected.innerText = j.name || 'Name not detected';
+        contactInfo.innerText = (j.email?('✉ '+j.email):'') + (j.phone?(' • ☎ '+j.phone):'');
+        suggestionsEl.innerHTML = '';
+        (j.suggestions||[]).forEach(sugg=>{ const d=document.createElement('div'); d.className='chip'; d.innerText=sugg; suggestionsEl.appendChild(d); });
+        skillsEl.innerHTML=''; (j.skills_detected||[]).forEach(sk=>{const d=document.createElement('div');d.className='chip';d.innerText=sk;skillsEl.appendChild(d)});
+        preview.innerText = j.raw_text_preview || '';
+
+        // Save to history
+        saveToHistory(j);
+        updateHistoryDisplay();
+      }
+
+      function saveToHistory(analysis) {
+        let history = JSON.parse(localStorage.getItem('analysisHistory') || '[]');
+        history.unshift({
+          timestamp: new Date().toLocaleString(),
+          name: analysis.name || 'Unknown',
+          score: Math.round(analysis.score || 0),
+          email: analysis.email || 'N/A'
+        });
+        // Keep only last 20 analyses
+        if (history.length > 20) history.pop();
+        localStorage.setItem('analysisHistory', JSON.stringify(history));
+      }
+
+      function updateHistoryDisplay() {
+        const history = JSON.parse(localStorage.getItem('analysisHistory') || '[]');
+        const historyList = document.getElementById('historyList');
+        
+        // Update stats
+        if (history.length > 0) {
+          const scores = history.map(h => h.score);
+          const avgScore = Math.round(scores.reduce((a, b) => a + b, 0) / scores.length);
+          const maxScore = Math.max(...scores);
+          const minScore = Math.min(...scores);
+          const improvement = maxScore - minScore;
+          
+          document.getElementById('totalAnalyses').textContent = history.length;
+          document.getElementById('averageScore').textContent = avgScore;
+          document.getElementById('highestScore').textContent = maxScore;
+          document.getElementById('improvementPercent').textContent = improvement > 0 ? '+' + improvement : improvement;
+        }
+
+        if (history.length === 0) {
+          historyList.innerHTML = `
+            <div style="padding: 40px 20px; text-align: center;">
+              <div style="font-size: 32px; margin-bottom: 12px;">📊</div>
+              <p>No analyses yet. Upload your first resume to get started!</p>
+              <button class="btn" onclick="switchPage('upload');" style="cursor: pointer; margin-top: 16px; font-size: 13px; padding: 8px 16px;">Upload Resume</button>
+            </div>
+          `;
+          return;
+        }
+
+        historyList.innerHTML = '<div style="display: grid; gap: 12px;">' + 
+          history.map((item, idx) => `
+            <div class="card" style="background: linear-gradient(135deg, rgba(59, 130, 246, 0.08), rgba(139, 92, 246, 0.08)); border: 1px solid rgba(59, 130, 246, 0.2); cursor: pointer; transition: all 0.3s ease;" onmouseover="this.style.borderColor='var(--accent)'; this.style.background='linear-gradient(135deg, rgba(59, 130, 246, 0.15), rgba(139, 92, 246, 0.15))'" onmouseout="this.style.borderColor='rgba(59, 130, 246, 0.2)'; this.style.background='linear-gradient(135deg, rgba(59, 130, 246, 0.08), rgba(139, 92, 246, 0.08))'">
+              <div style="display: flex; justify-content: space-between; align-items: flex-start;">
+                <div style="flex: 1;">
+                  <div style="font-size: 16px; font-weight: 600; color: var(--text-primary);">${item.name}</div>
+                  <div style="display: flex; gap: 16px; margin-top: 8px; font-size: 13px;">
+                    <span style="color: #94a3b8;">📅 ${item.timestamp}</span>
+                    ${item.email !== 'N/A' ? `<span style="color: #cbd5e1;">📧 ${item.email}</span>` : ''}
+                  </div>
+                </div>
+                <div style="text-align: right; min-width: 80px;">
+                  <div style="font-size: 28px; font-weight: bold; background: linear-gradient(135deg, #667eea, #764ba2); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;">${item.score}</div>
+                  <div style="font-size: 11px; color: #94a3b8; margin-top: 2px;">ATS Score</div>
+                </div>
+              </div>
+            </div>
+          `).join('') + 
+          '</div>';
+      }
+
+      // Load history on page load
+      window.addEventListener('load', () => {
+        updateHistoryDisplay();
+      });
+
+      // Chat
+      const messages = document.getElementById('messages');
+      const chatInput = document.getElementById('chatInput');
+      const sendBtn = document.getElementById('sendBtn');
+
+      function addMessage(type, text){ const el = document.createElement('div'); el.className='msg '+(type==='user'?'user':'system'); el.innerText = text; messages.appendChild(el); messages.scrollTop = messages.scrollHeight; }
+
+      sendBtn.addEventListener('click', sendChat);
+      chatInput.addEventListener('keydown', e=>{ if(e.key==='Enter') sendChat(); });
+
+      async function sendChat(){
+        const msg = chatInput.value.trim(); if(!msg) return; addMessage('user', msg); chatInput.value='';
+        setStatus('thinking...');
+        try{
+          const payload = {message: msg, analysis: lastAnalysis};
+          const res = await fetch('/api/chat', {method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify(payload)});
+          const j = await res.json();
+          addMessage('system', j.response);
+          setStatus('ready');
+        }catch(err){ console.error(err); addMessage('system','Error contacting assistant'); setStatus('error'); }
+      }
+
+    </script>
+  </body>
+</html>
